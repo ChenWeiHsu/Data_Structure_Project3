@@ -24,76 +24,59 @@ using namespace std;
  * 3. The function that return the color fo the cell(row, col)
  * 4. The function that print out the current board statement
 *************************************************************************/
+
 int Point(Board board, Player player)
 {
     int player_orbs = 0;
-    //int enemy_orbs = 0;
-    //int total_orbs = 0;
 
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 6; j++) {
             if (player.get_color() == board.get_cell_color(i, j)) {
                 player_orbs += board.get_orbs_num(i, j);
             }
-            //else if (player.get_color() != board.get_cell_color(i, j) && player.get_color() != 'w') {
-            //    enemy_orbs += board.get_orbs_num(i, j);
-            //}
         }
     }
-    //total_orbs = player_orbs + enemy_orbs;
-/*
-    cout << "###########################" << endl;
-    cout << "Depth = 3" << endl;
-    cout << "player_orbs :  " << player_orbs << endl;
-    cout << "enemy_orbs : " << enemy_orbs << endl;
-    cout << "total_orbs : " << total_orbs << endl;
-    cout << "###########################" << endl;
-*/
     return player_orbs;
 }
 
 int alphabeta_minimax(int depth, bool maximizingPlayer, int alpha, int beta, Board board, Player* player, Player* enemy, int* x_pos, int* y_pos)
 {
-    int value;
+    int point;
     int largest;
-    bool flag = false;
     bool first_valid = true;
-    if (depth == 5) {
-
-        // return the number of orbs of the player's color
-        return Point(board, *player);//!!!!!!!!!!!
-    }
     Board board_temp = board;
+    if (depth == 5) {
+        // return the number of orbs of the player's color
+        return Point(board, *player);
+    }
     if (maximizingPlayer) {
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 6; j++) {
                 if (board.place_orb(i, j, player)) {
-                    value = max(alpha, alphabeta_minimax(depth + 1, false, alpha, beta, board, player, enemy, x_pos, y_pos));
+                    point = max(alpha, alphabeta_minimax(depth + 1, false, alpha, beta, board, player, enemy, x_pos, y_pos));
 
                     // if the depth is 0, then x_pos & y_pos are the row & col where the largest point exists
                     // we need to find the row & col that has the largest point
                     // if the point is the largest, then x_pos = row, y_pos = j
                     if (depth == 0) {
                         if (first_valid) {
-                            largest = value;
+                            largest = point;
                             first_valid = false;
                             *x_pos = i;
                             *y_pos = j;
-                        }                
-                        if (value > largest) {
-                            largest = value;
+                        }
+                        if (point > largest) {
+                            largest = point;
                             *x_pos = i;
                             *y_pos = j;
                         }
                     }
                     board = board_temp;
-                    alpha = value;              
+                    alpha = point;              // point >= alpha
                     if (beta <= alpha)
                         break;
-                }        
+                }
             }
-            if (flag == true)
-                break;
         }
         return alpha;
     }
@@ -103,14 +86,10 @@ int alphabeta_minimax(int depth, bool maximizingPlayer, int alpha, int beta, Boa
                 if (board.place_orb(i, j, enemy)) {
                     beta = min(beta, alphabeta_minimax(depth + 1, true, alpha, beta, board, player, enemy, x_pos, y_pos));
                     board = board_temp;
-                    if (beta <= alpha) {
-                        flag = true;
-                        break;                        
-                    }
+                    if (beta <= alpha)
+                        break;
                 }
             }
-            if (flag == true)
-                break;
         }
         return beta;
     }
@@ -118,12 +97,9 @@ int alphabeta_minimax(int depth, bool maximizingPlayer, int alpha, int beta, Boa
 
 
 void algorithm_A(Board board, Player player, int index[]){
-    ////    TIME    ////            OK!
-    clock_t start = clock();
     ////    TIME    ////
-
-
-
+    //clock_t start = clock();
+    ////    TIME    ////
 
 
     ////    VARIABLES   ////
@@ -133,32 +109,29 @@ void algorithm_A(Board board, Player player, int index[]){
     ////    VARIABLES   ////
 
 
-    color = player.get_color();     // know which color the algo will play
+    ////    PLAYER  ////
     Player R_player('r');
     Player B_player('b');
+    ////    PLAYER  ////
 
+
+    ////    MINIMAX     ////
+    color = player.get_color();     // know which color the algo will play
     if (color == 'r')               // player means red
-        alphabeta_minimax(0, true, -32768, 32767, board, &player, &B_player, &row, &col);
+        alphabeta_minimax(0, true, -32768, 32767, board, &R_player, &B_player, &row, &col);
     else if (color == 'b')          // player means blue
-        alphabeta_minimax(0, true, -32768, 32767, board, &player, &R_player, &row, &col);
+        alphabeta_minimax(0, true, -32768, 32767, board, &B_player, &R_player, &row, &col);
+    ////    MINIMAX     ////
 
 
-    
-
-
-
-
-
-
-
-    ////    OUTPUT INDEX    ////    OK!
+    ////    OUTPUT INDEX    ////
     index[0] = row;
-    index[1] = col; 
+    index[1] = col;
     ////    OUTPUT INDEX    ////
 
-    ////    TIME    ////            OK!
-    clock_t end = clock();
-    double time_taken = double(end - start) / CLOCKS_PER_SEC;
-    cout << "Algorithm_A Time: " << time_taken << endl;
+    ////    TIME    ////
+    //clock_t end = clock();
+    //double time_taken = double(end - start) / CLOCKS_PER_SEC;
+    //cout << "Algorithm_A Time: " << time_taken << endl;
     ////    TIME    ////
 }
